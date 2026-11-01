@@ -1,16 +1,30 @@
-# React + Vite
+NUwhere
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+NUwhere is a website where Northeastern students can rate and review NUin programs, Dialogues of Civilizations, and other Northeastern campus locations. Students who have been there share honest ratings on everything from food to dorms, so future students can choose where to go with real information.
 
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+Features
+Core
+Guest browsing: Anyone can search and view locations, ratings, and reviews without an account
+Northeastern login: Writing a review requires signing in with a @northeastern.edu email
+Program verification: Reviewers confirm they attended a program by uploading a document (such as a deposit letter), which is scanned for keywords
+5-star ratings by category:
+Food
+Location
+Social life
+Education
+Prices
+Dorm
+Campus
+Written comments and photos: Reviews can include text and pictures
+Default images: Each location has general photos of its campus, dorms, and social spaces
+Review screening: Reviews are checked against a list of obscene words before posting
+Rating averages: Each location shows an average for every category plus an overall average
+Search: Find specific programs and locations
+AI Features
+Review summaries: AI generates a short summary of all reviews for each location
+Planned (If Time Allows)
+Location matching: Recommends locations to users based on their preferences and existing ratings
+Tech Stack
+Frontend: React + Vite
+Backend / Database: Supabase
+Linting: Oxlint
