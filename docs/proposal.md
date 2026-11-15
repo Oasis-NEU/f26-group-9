@@ -55,7 +55,7 @@ The React app talks to Supabase directly for everything except moderation and AI
 ### Repo layout
 
 ```
-/frontend            Vite + React + TypeScript
+/src                 Vite + React (JavaScript) app at the repo root
 /backend             FastAPI (managed with uv)
 /supabase
   /migrations        SQL from section 5, split into ordered files
@@ -121,7 +121,8 @@ await supabase.auth.verifyOtp({ email, token, type: "email" });
 - The term is copied onto each review at insert, so the public can see "Attended Fall 2025" without being able to read anyone's attendance list.
 
 ### 4.3 Reviews and ratings
-- Single RPC `submit_review(location_id, comment, ratings_json)` creates or updates the review and replaces its ratings in one transaction.
+- Single RPC `submit_review(location_id, comment, ratings_json, photo_paths)` creates or updates the review, replaces its ratings, and links newly uploaded photos in one transaction (so moderation never races a half-finished upload).
+- Ratings and photos can only be written while the review is `pending` (RLS), so an approved review can't be changed without going back through moderation.
 - `ratings_json` example: `{"food": 4, "dorm": 5, "prices": 2}` — omitted categories are N/A.
 - Triggers force `status = 'pending'` on every user insert/edit, enforce the 1-hour edit cooldown, and stop users from changing `user_id`, `location_id`, or status.
 
@@ -135,7 +136,7 @@ await supabase.auth.verifyOtp({ email, token, type: "email" });
 
 ### 4.5 Photos
 - Private Storage bucket `review-photos`, 5 MB limit, `image/jpeg`, `image/png`, `image/webp` only.
-- Path format: `{user_id}/{review_id}/{uuid}.webp`.
+- Path format: `{user_id}/{uuid}.webp`. Files are uploaded first, then their paths are passed to `submit_review`.
 - **Client-side re-encode before upload**: draw to a `<canvas>`, resize to max 1600px, export as WebP. This strips EXIF (including GPS coordinates of where students live).
 - Max 4 photos per review (trigger).
 - Photos are only readable when their review is approved (Storage RLS). Frontend fetches them with `createSignedUrls`.
@@ -150,6 +151,7 @@ Triggered by a Supabase **Database Webhook** on `reviews` INSERT and UPDATE → 
 4. **LLM moderation** (Claude): returns `{"decision": "approve" | "flag", "reasons": [...]}`. Flags harassment, personal info about named individuals, spam, off-topic content.
 5. Update `status` + `moderation_notes` with the service role client.
 6. If approved → check whether the campus summary is stale (4.7).
+7. Also run the summary check on UPDATE events where `old_record.status != 'approved'` and `record.status == 'approved'` (admin approvals from the flagged queue).
 
 Plus a **Report** button on each review (stretch for week 4 if time is short) that flips it to `flagged`.
 
@@ -872,20 +874,22 @@ export async function toCleanWebp(file: File, maxSide = 1600): Promise<Blob> {
 ### Submit flow
 
 ```ts
-// 1. Review + ratings
+// 1. Upload new photos (re-encoded, EXIF stripped)
+const paths = [];
+for (const file of files) {
+  const blob = await toCleanWebp(file);
+  const path = `${userId}/${crypto.randomUUID()}.webp`;
+  await supabase.storage.from("review-photos").upload(path, blob, { contentType: "image/webp" });
+  paths.push(path);
+}
+
+// 2. Review + ratings + photo links, atomically
 const { data: reviewId, error } = await supabase.rpc("submit_review", {
   p_location_id: locationId,
   p_comment: comment,
   p_ratings: ratings, // { food: 4, dorm: 5 }
+  p_photo_paths: paths,
 });
-
-// 2. Photos
-for (const file of files) {
-  const blob = await toCleanWebp(file);
-  const path = `${userId}/${reviewId}/${crypto.randomUUID()}.webp`;
-  await supabase.storage.from("review-photos").upload(path, blob, { contentType: "image/webp" });
-  await supabase.from("review_photos").insert({ review_id: reviewId, storage_path: path });
-}
 ```
 
 Surface trigger errors (cooldown, caps) directly to the user — the messages are written to be user-facing.
