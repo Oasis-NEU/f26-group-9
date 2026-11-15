@@ -3,6 +3,7 @@ import Layout from './components/Layout'
 import AuthGate from './components/AuthGate'
 import Home from './pages/Home'
 import Search from './pages/Search'
+import Match from './pages/Match'
 import Campus from './pages/Campus'
 import Login from './pages/Login'
 import Onboarding from './pages/Onboarding'
@@ -18,6 +19,7 @@ export default function App() {
       <Route element={<Layout />}>
         <Route index element={<Home />} />
         <Route path="search" element={<Search />} />
+        <Route path="match" element={<Match />} />
         <Route path="campus/:slug" element={<Campus />} />
         <Route path="login" element={<Login />} />
         <Route

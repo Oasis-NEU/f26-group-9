@@ -95,3 +95,7 @@ export async function getModerationQueue(status) {
 export async function moderateReview(reviewId, decision) {
   unwrap(await supabase.rpc('moderate_review', { p_review_id: reviewId, p_decision: decision }))
 }
+
+export async function reportReview(reviewId, reason) {
+  unwrap(await supabase.rpc('report_review', { p_review_id: reviewId, p_reason: reason }))
+}

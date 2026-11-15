@@ -25,6 +25,9 @@ export default function Layout() {
             <NavLink to="/search" className={navClass}>
               Browse
             </NavLink>
+            <NavLink to="/match" className={navClass}>
+              Find a match
+            </NavLink>
             {profile?.is_admin && (
               <NavLink to="/admin/moderation" className={navClass}>
                 Moderation
