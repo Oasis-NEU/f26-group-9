@@ -3,16 +3,22 @@ import { Link } from 'react-router-dom'
 import { getModerationQueue, moderateReview } from '../services/reviews'
 import { useAsync } from '../hooks/useAsync'
 import ReviewCard from '../components/ReviewCard'
+import SummariesPanel from '../components/SummariesPanel'
 import ErrorMessage from '../components/ErrorMessage'
 import Spinner from '../components/Spinner'
 
 // "pending" is included so reviews can be approved by hand while the
 // moderation backend isn't running (e.g. local dev, demo fallback).
-const TABS = ['flagged', 'pending']
+const QUEUES = ['flagged', 'pending']
+const TABS = [...QUEUES, 'summaries']
 
 export default function AdminModeration() {
   const [tab, setTab] = useState('flagged')
-  const { data, error, loading, reload } = useAsync(() => getModerationQueue(tab), [tab])
+  const isQueue = QUEUES.includes(tab)
+  const { data, error, loading, reload } = useAsync(
+    () => (isQueue ? getModerationQueue(tab) : Promise.resolve(null)),
+    [tab],
+  )
   const [busyId, setBusyId] = useState(null)
   const [actionError, setActionError] = useState(null)
 
@@ -45,8 +51,9 @@ export default function AdminModeration() {
         ))}
       </div>
 
+      {tab === 'summaries' && <SummariesPanel />}
       <ErrorMessage error={actionError} />
-      {loading && <Spinner />}
+      {isQueue && loading && <Spinner />}
       <ErrorMessage error={error} />
       {data?.length === 0 && <p className="text-gray-500">Nothing in the {tab} queue.</p>}
 

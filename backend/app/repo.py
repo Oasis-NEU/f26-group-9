@@ -67,6 +67,9 @@ class Repo:
             .data
         )
 
+    def list_locations(self) -> list[dict[str, Any]]:
+        return self.sb.table("locations").select("id, name").order("name").execute().data
+
     def location_name(self, location_id: int) -> str:
         rows = self.sb.table("locations").select("name").eq("id", location_id).execute().data
         return rows[0]["name"] if rows else "this campus"

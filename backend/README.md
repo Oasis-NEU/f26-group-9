@@ -37,6 +37,16 @@ uv run pytest
 
 The hosted Supabase webhook can't reach `localhost`. For end-to-end testing, expose your dev server with `cloudflared tunnel --url http://localhost:8000` (or ngrok) and point the webhook at that URL.
 
+## Pre-generate summaries
+
+```bash
+uv run python -m app.cli summaries            # only stale ones
+uv run python -m app.cli summaries --force    # every campus with approved reviews
+uv run python -m app.cli summaries --location 3
+```
+
+Admins can also regenerate one campus from **Moderation → Summaries** in the app (needs `VITE_BACKEND_URL` in the frontend `.env`).
+
 ## Deploy
 
 Use any host that runs a long-lived process (Render, Railway, Fly.io). Avoid serverless functions: moderation runs as a background task after the webhook response is sent, and serverless platforms may kill it.
@@ -56,4 +66,5 @@ Then in Supabase go to **Database → Webhooks → Create**:
 - `app/pipeline.py`: moderation and summary logic
 - `app/llm.py`: Claude calls, prompts, and response schemas
 - `app/repo.py`: all Supabase access (service role)
+- `app/cli.py`: admin CLI (summaries)
 - `tests/`: pytest. The LLM tests run the real Anthropic SDK against a mock HTTP transport, so no API key or network is needed.

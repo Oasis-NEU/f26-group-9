@@ -5,7 +5,7 @@ import Stars from './Stars'
 const order = Object.fromEntries(CATEGORIES.map((c, i) => [c.key, i]))
 
 // No names or emails, ever — only the attended term.
-export default function ReviewCard({ review, header }) {
+export default function ReviewCard({ review, header, footer }) {
   const ratings = [...review.review_ratings].sort((a, b) => order[a.category] - order[b.category])
   return (
     <article className="rounded-lg border border-gray-200 p-4">
@@ -33,6 +33,7 @@ export default function ReviewCard({ review, header }) {
           ))}
         </div>
       )}
+      {footer}
     </article>
   )
 }

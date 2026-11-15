@@ -36,6 +36,9 @@ class FakeRepo:
              "review_ratings": [{"category": "food", "stars": 5}]}
         ]
 
+    def list_locations(self):
+        return [{"id": 1, "name": "Boston"}, {"id": 2, "name": "London"}]
+
     def location_name(self, location_id):
         return "Boston"
 

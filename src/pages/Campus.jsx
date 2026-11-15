@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getCategoryScores, getLocationBySlug, getLocationScore, getSummary } from '../services/locations'
 import { getApprovedReviews, getMyReview } from '../services/reviews'
@@ -10,6 +11,7 @@ import CategoryBars from '../components/CategoryBars'
 import AISummary from '../components/AISummary'
 import ReviewCard from '../components/ReviewCard'
 import StatusBanner from '../components/StatusBanner'
+import ReportButton from '../components/ReportButton'
 import Spinner from '../components/Spinner'
 import ErrorMessage from '../components/ErrorMessage'
 import NotFound from './NotFound'
@@ -35,6 +37,7 @@ export default function Campus() {
     () => (user && locationId ? getMyReview(user.id, locationId) : Promise.resolve(null)),
     [user?.id, locationId],
   )
+  const [reportedIds, setReportedIds] = useState(() => new Set())
 
   if (loading) return <Spinner />
   if (error) return <ErrorMessage error={error} />
@@ -44,7 +47,7 @@ export default function Campus() {
   const reviewCount = Number(score?.review_count ?? 0)
   const attended = attendance.some((a) => a.location_id === location.id)
   const myReview = mine.data
-  const others = reviews.filter((r) => r.id !== myReview?.id)
+  const others = reviews.filter((r) => r.id !== myReview?.id && !reportedIds.has(r.id))
 
   return (
     <div className="space-y-8">
@@ -91,8 +94,21 @@ export default function Campus() {
           <section className="space-y-3">
             <h2 className="text-lg font-semibold">Reviews</h2>
             {others.length === 0 && <p className="text-gray-500">No other reviews yet.</p>}
+            {reportedIds.size > 0 && (
+              <p className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700">
+                Thanks for reporting. A moderator will review it.
+              </p>
+            )}
             {others.map((r) => (
-              <ReviewCard key={r.id} review={r} />
+              <ReviewCard
+                key={r.id}
+                review={r}
+                footer={
+                  user && (
+                    <ReportButton reviewId={r.id} onReported={(id) => setReportedIds((s) => new Set(s).add(id))} />
+                  )
+                }
+              />
             ))}
           </section>
         </div>
