@@ -148,7 +148,7 @@ Triggered by a Supabase **Database Webhook** on `reviews` INSERT and UPDATE → 
 1. Verify `X-Webhook-Secret` header.
 2. Ignore events where `record.status != 'pending'` (prevents a loop when the backend itself updates status).
 3. **Profanity check** with `better-profanity`. Hit → `flagged`.
-4. **LLM moderation** (Claude): returns `{"decision": "approve" | "flag", "reasons": [...]}`. Flags harassment, personal info about named individuals, spam, off-topic content.
+4. **LLM moderation** (Claude, structured outputs): returns `{"decision": "approve" | "flag", "reasons": [...]}`. Flags harassment, personal info about named individuals, spam, off-topic content. Review photos are included as signed URLs so images are checked too. If Claude is unavailable or declines, the review is flagged for a human (fail closed).
 5. Update `status` + `moderation_notes` with the service role client.
 6. If approved → check whether the campus summary is stale (4.7).
 7. Also run the summary check on UPDATE events where `old_record.status != 'approved'` and `record.status == 'approved'` (admin approvals from the flagged queue).

@@ -63,4 +63,4 @@ One-time dashboard steps:
 4. **Database → Webhooks:** once the backend is deployed, add a webhook on `reviews` (INSERT + UPDATE) → `POST https://<backend>/webhooks/reviews` with header `X-Webhook-Secret`.
 
 ### Backend
-See `backend/README.md` (coming in Phase 3).
+See [`backend/README.md`](backend/README.md) for setup, tests, deployment, and webhook configuration.
