@@ -1,11 +1,59 @@
-// Placeholder until the router and pages land in Phase 2 (see docs/proposal.md §7).
-function App() {
+import { Route, Routes } from 'react-router-dom'
+import Layout from './components/Layout'
+import AuthGate from './components/AuthGate'
+import Home from './pages/Home'
+import Search from './pages/Search'
+import Campus from './pages/Campus'
+import Login from './pages/Login'
+import Onboarding from './pages/Onboarding'
+import ReviewForm from './pages/ReviewForm'
+import Me from './pages/Me'
+import AdminModeration from './pages/AdminModeration'
+import NotFound from './pages/NotFound'
+
+// Routes from docs/proposal.md §7
+export default function App() {
   return (
-    <main className="mx-auto max-w-3xl p-6">
-      <h1 className="text-3xl font-semibold">NUwhere</h1>
-      <p className="mt-2 text-gray-600">Honest campus reviews from Northeastern students.</p>
-    </main>
+    <Routes>
+      <Route element={<Layout />}>
+        <Route index element={<Home />} />
+        <Route path="search" element={<Search />} />
+        <Route path="campus/:slug" element={<Campus />} />
+        <Route path="login" element={<Login />} />
+        <Route
+          path="onboarding"
+          element={
+            <AuthGate>
+              <Onboarding />
+            </AuthGate>
+          }
+        />
+        <Route
+          path="campus/:slug/review"
+          element={
+            <AuthGate requireOnboarded>
+              <ReviewForm />
+            </AuthGate>
+          }
+        />
+        <Route
+          path="me"
+          element={
+            <AuthGate>
+              <Me />
+            </AuthGate>
+          }
+        />
+        <Route
+          path="admin/moderation"
+          element={
+            <AuthGate requireAdmin>
+              <AdminModeration />
+            </AuthGate>
+          }
+        />
+        <Route path="*" element={<NotFound />} />
+      </Route>
+    </Routes>
   )
 }
-
-export default App
